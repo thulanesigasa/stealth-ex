@@ -20,6 +20,7 @@
                                                 "\u003call_urls\u003e"
                                             ],
                                 "js":  [
+                                           "src/content/ui.js",
                                            "src/content/index.js"
                                        ],
                                 "css":  [
