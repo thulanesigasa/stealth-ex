@@ -178,8 +178,36 @@ function scanForQuestions() {
 // Initial scan
 setTimeout(scanForQuestions, 1000);
 
-// Periodically check for dynamically added/removed questions
-setInterval(scanForQuestions, 500);
+// Periodically check for dynamically added/removed questions (fallback)
+setInterval(scanForQuestions, 1000);
+
+// Implement MutationObserver to instantly detect SPA DOM changes/transitions
+let lastScannedText = '';
+const observer = new MutationObserver(() => {
+  // Quickly gather candidates to see if question text has changed, avoiding heavy layout thrashing
+  const candidates = findQuestionElements();
+  const visible = candidates.filter(isElementVisible);
+  if (visible.length > 0) {
+    const text = (visible[visible.length - 1].innerText || '').trim();
+    if (text !== lastScannedText) {
+      lastScannedText = text;
+      // Immediately clear the UI so it doesn't get stuck showing the old question/answer
+      window.StealthUI.clearBlocks();
+      scanForQuestions();
+    }
+  } else {
+    if (lastScannedText !== '') {
+      lastScannedText = '';
+      window.StealthUI.clearBlocks();
+    }
+  }
+});
+
+observer.observe(document.body, {
+  childList: true,
+  subtree: true,
+  characterData: true
+});
 
 // Bind manual scan request from UI
 window.StealthUI.onScanRequested = () => {
@@ -189,5 +217,6 @@ window.StealthUI.onScanRequested = () => {
       questionCache.delete(text);
     }
   }
+  lastScannedText = ''; // force update
   scanForQuestions();
 };
