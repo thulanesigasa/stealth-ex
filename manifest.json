@@ -12,8 +12,7 @@
                              "\u003call_urls\u003e"
                          ],
     "background":  {
-                       "service_worker":  "src/background/index.js",
-                       "type": "module"
+                       "service_worker":  "src/background/index.js"
                    },
     "content_scripts":  [
                             {
