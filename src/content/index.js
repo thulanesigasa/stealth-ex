@@ -39,6 +39,10 @@ function findQuestionElements() {
     const text = (el.innerText || '').trim();
     if (text.length < 12 || text.length > 500) return false;
 
+    // Filter out common header/footer/navigation text
+    const isNavOrHeader = /\b(quiz|test|exam|score|time|question\s+no|points|next|previous|submit|quit|exit|menu|nav|navigation|copyright|all\s+rights\s+reserved)\b/i.test(text);
+    if (isNavOrHeader) return false;
+
     // Must not be an interactive option or button
     let current = el;
     while (current && current !== document.body) {
@@ -64,10 +68,12 @@ function findQuestionElements() {
       current = current.parentElement;
     }
 
-    // Broad set of keywords commonly found in questions/instructions
-    const hasQuestionIndicator = text.endsWith('?') || /\b(write|create|explain|define|match|select|choose|identify|which|what|how|why|when|where|evaluate|solve|true|false|arrange|order|steps?|implement|determine|fill|complete|correct|incorrect|result|output|print|happen|perform|assignment|python|code|program)\b/i.test(text);
-    
-    return hasQuestionIndicator;
+    // Must look like a sentence or instruction (at least 3 words and contains letters)
+    const words = text.split(/\s+/);
+    if (words.length < 3) return false;
+    if (!/[a-zA-Z]/.test(text)) return false;
+
+    return true;
   });
 
   // Filter out any elements that are just wrappers around another valid question element
