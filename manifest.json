@@ -1,28 +1,34 @@
 {
-  "manifest_version": 3,
-  "name": "Stealth-Ex Screen Reader",
-  "version": "1.0.0",
-  "description": "Reads questions from the active tab and provides direct answers via OpenAI.",
-  "permissions": [
-    "activeTab",
-    "scripting",
-    "storage"
-  ],
-  "host_permissions": [
-    "<all_urls>"
-  ],
-  "background": {
-    "service_worker": "background.js"
-  },
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"],
-      "css": ["style.css"]
-    }
-  ],
-  "options_page": "options.html",
-  "action": {
-    "default_title": "Stealth-Ex"
-  }
+    "manifest_version":  3,
+    "name":  "Stealth-Ex Screen Reader",
+    "version":  "1.0.0",
+    "description":  "Reads questions from the active tab and provides direct answers via OpenAI.",
+    "permissions":  [
+                        "activeTab",
+                        "scripting",
+                        "storage"
+                    ],
+    "host_permissions":  [
+                             "\u003call_urls\u003e"
+                         ],
+    "background":  {
+                       "service_worker":  "src/background/index.js"
+                   },
+    "content_scripts":  [
+                            {
+                                "matches":  [
+                                                "\u003call_urls\u003e"
+                                            ],
+                                "js":  [
+                                           "src/content/index.js"
+                                       ],
+                                "css":  [
+                                            "src/styles/content.css"
+                                        ]
+                            }
+                        ],
+    "options_page":  "src/options/index.html",
+    "action":  {
+                   "default_title":  "Stealth-Ex"
+               }
 }
