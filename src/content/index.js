@@ -7,10 +7,8 @@ function isElementVisible(el) {
   return (
     rect.width > 0 &&
     rect.height > 0 &&
-    rect.top >= 0 &&
-    rect.left >= 0 &&
-    rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-    rect.right <= (window.innerWidth || document.documentElement.clientWidth) &&
+    rect.top < (window.innerHeight || document.documentElement.clientHeight) &&
+    rect.bottom > 0 &&
     window.getComputedStyle(el).visibility !== 'hidden' &&
     window.getComputedStyle(el).opacity !== '0' &&
     window.getComputedStyle(el).display !== 'none'
@@ -82,3 +80,6 @@ setTimeout(scanForQuestions, 1000);
 
 // Periodically check for dynamically added/removed questions
 setInterval(scanForQuestions, 2000);
+
+// Bind manual scan request from UI
+window.StealthUI.onScanRequested = scanForQuestions;
