@@ -35,12 +35,39 @@ function isElementVisible(el) {
 }
 
 function findQuestionElements() {
-  // Find all elements containing text that ends with a question mark
-  const candidates = Array.from(document.querySelectorAll('*')).filter(el => {
+  const candidates = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, div, li')).filter(el => {
     const text = (el.innerText || '').trim();
-    // Match questions ending in ? OR starting with a question word (even if prefixed by a number like "2 ")
-    const isQuestion = text.endsWith('?') || /^\s*(\d+[\.\)]?\s*)?(match|select|choose|identify|which|what|how|why|when|where|evaluate|solve|true|false|arrange|order|steps?)\b/i.test(text);
-    return isQuestion && text.length > 10 && text.length < 500;
+    if (text.length < 12 || text.length > 500) return false;
+
+    // Must not be an interactive option or button
+    let current = el;
+    while (current && current !== document.body) {
+      const style = window.getComputedStyle(current);
+      if (style.cursor === 'pointer' || style.cursor === 'grab' || style.cursor === 'grabbing') {
+        return false;
+      }
+      const className = (current.className || '').toString().toLowerCase();
+      const tagName = current.tagName.toLowerCase();
+      if (
+        tagName === 'button' || 
+        tagName === 'a' || 
+        tagName === 'input' || 
+        current.getAttribute('role') === 'button' ||
+        className.includes('option') ||
+        className.includes('choice') ||
+        className.includes('btn') ||
+        className.includes('drag') ||
+        className.includes('drop')
+      ) {
+        return false;
+      }
+      current = current.parentElement;
+    }
+
+    // Broad set of keywords commonly found in questions/instructions
+    const hasQuestionIndicator = text.endsWith('?') || /\b(write|create|explain|define|match|select|choose|identify|which|what|how|why|when|where|evaluate|solve|true|false|arrange|order|steps?|implement|determine|fill|complete|correct|incorrect|result|output|print|happen|perform|assignment|python|code|program)\b/i.test(text);
+    
+    return hasQuestionIndicator;
   });
 
   // Filter out any elements that are just wrappers around another valid question element
