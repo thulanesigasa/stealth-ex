@@ -121,13 +121,9 @@ function scanForQuestions() {
     }
   });
 
-  window.StealthUI.clearBlocks();
-
-  // STRICT LIMIT: Only display the LAST valid question found in the DOM.
-  // This permanently eliminates ghost slide stacking in modern SPAs/carousels.
-  if (visibleQuestions.length > 0) {
-    const text = visibleQuestions[visibleQuestions.length - 1];
-
+  // Process all currently visible questions.
+  // Since StealthUI.addQABlock prepends to the container, the newest questions in DOM order will naturally sit at the top of the history.
+  visibleQuestions.forEach(text => {
     if (!questionCache.has(text)) {
       const questionId = Date.now().toString() + Math.floor(Math.random() * 1000);
       questionCache.set(text, { id: questionId, answer: null });
@@ -175,10 +171,10 @@ function scanForQuestions() {
       }
     }
     
-    // Add the block (it will use the cached answer if available, or 'Thinking...' if null)
+    // Add the block or bring the existing block to the top of the history list
     const cacheData = questionCache.get(text);
     window.StealthUI.addQABlock(cacheData.id, text, cacheData.answer);
-  }
+  });
 }
 
 // Initial scan
