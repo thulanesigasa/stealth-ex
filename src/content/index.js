@@ -17,12 +17,19 @@ function isElementVisible(el) {
     return false;
   }
 
-  // Walk up the DOM tree to ensure no parent wrapper is hidden or faded out
+  // Walk up the DOM tree to ensure no parent wrapper is hidden, faded out, or collapsed with overflow hidden
   let current = el;
   while (current && current !== document.body && current !== document.documentElement) {
     const style = window.getComputedStyle(current);
     if (style.opacity < 0.05 || style.visibility === 'hidden' || style.display === 'none') {
       return false;
+    }
+    // Check if parent is collapsed to 0 height/width and clipping its children
+    if (style.overflow === 'hidden' || style.overflowY === 'hidden' || style.overflowX === 'hidden') {
+      const parentRect = current.getBoundingClientRect();
+      if (parentRect.height < 5 || parentRect.width < 5) {
+        return false;
+      }
     }
     // Check for common inactive carousel slide attributes
     if (current.getAttribute('aria-hidden') === 'true' || style.pointerEvents === 'none') {
@@ -39,7 +46,7 @@ function findQuestionElements() {
     const text = (el.innerText || '').trim();
     if (text.length < 12 || text.length > 500) return false;
 
-    // Safe blacklist: only discard exact matches for navigation, or very short header/footer patterns
+    // Filter out common header/footer/navigation text
     const textLower = text.toLowerCase();
     const exactBlacklist = ['next', 'previous', 'submit', 'quit', 'exit', 'menu', 'nav', 'navigation', 'back', 'skip', 'continue', 'quit quiz', 'submit quiz'];
     if (exactBlacklist.includes(textLower)) return false;
@@ -49,27 +56,36 @@ function findQuestionElements() {
 
     // Must not be an interactive option or button
     let current = el;
+    let depth = 0;
     while (current && current !== document.body) {
       const style = window.getComputedStyle(current);
       if (style.cursor === 'pointer' || style.cursor === 'grab' || style.cursor === 'grabbing') {
         return false;
       }
-      const className = (current.className || '').toString().toLowerCase();
       const tagName = current.tagName.toLowerCase();
       if (
         tagName === 'button' || 
         tagName === 'a' || 
         tagName === 'input' || 
-        current.getAttribute('role') === 'button' ||
-        className.includes('option') ||
-        className.includes('choice') ||
-        className.includes('btn') ||
-        className.includes('drag') ||
-        className.includes('drop')
+        current.getAttribute('role') === 'button'
       ) {
         return false;
       }
+      // Only filter out class names on the option itself or its immediate parent
+      if (depth < 2) {
+        const className = (current.className || '').toString().toLowerCase();
+        if (
+          className.includes('option') ||
+          className.includes('choice') ||
+          className.includes('btn') ||
+          className.includes('drag') ||
+          className.includes('drop')
+        ) {
+          return false;
+        }
+      }
       current = current.parentElement;
+      depth++;
     }
 
     // Must look like a sentence or instruction (at least 3 words and contains letters)
