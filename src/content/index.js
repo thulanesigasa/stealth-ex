@@ -179,21 +179,12 @@ function scanForQuestions() {
 setTimeout(scanForQuestions, 1000);
 
 // Periodically check for dynamically added/removed questions (fallback)
-setInterval(scanForQuestions, 1500);
+setInterval(scanForQuestions, 200);
 
 let lastScannedText = '';
 
-// Helper to debounce callbacks to avoid layout thrashing and duplicate API requests
-function debounce(func, wait) {
-  let timeout;
-  return function(...args) {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(this, args), wait);
-  };
-}
-
-// Resilient scan trigger
-const triggerScan = debounce(() => {
+// 1. Resilient Global Mutation Observer on document.body - scans instantly without debouncing delay
+const observer = new MutationObserver(() => {
   const candidates = findQuestionElements();
   const visible = candidates.filter(isElementVisible);
   
@@ -211,11 +202,6 @@ const triggerScan = debounce(() => {
       window.StealthUI.clearBlocks();
     }
   }
-}, 250);
-
-// 1. Resilient Global Mutation Observer on document.body
-const observer = new MutationObserver(() => {
-  triggerScan();
 });
 
 observer.observe(document.body, {
@@ -253,7 +239,7 @@ script.remove();
 const handleNavigation = () => {
   lastScannedText = '';
   window.StealthUI.clearBlocks();
-  triggerScan();
+  scanForQuestions();
 };
 
 window.addEventListener('popstate', handleNavigation);
