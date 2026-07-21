@@ -28,8 +28,17 @@
                                         ]
                             }
                         ],
-    "options_page":  "src/options/index.html",
+    "icons": {
+        "16": "src/img/icon.png",
+        "48": "src/img/icon.png",
+        "128": "src/img/icon.png"
+    },
     "action":  {
+                   "default_icon": {
+                       "16": "src/img/icon.png",
+                       "48": "src/img/icon.png",
+                       "128": "src/img/icon.png"
+                   },
                    "default_title":  "Stealth-Ex"
                }
 }
