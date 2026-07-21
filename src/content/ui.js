@@ -1,13 +1,21 @@
 window.StealthUI = {
   createOverlay: function() {
-    if (document.getElementById('stealth-ex-container')) return;
-
-    const container = document.createElement('div');
-    container.id = 'stealth-ex-container';
-    document.body.appendChild(container);
+    let container = document.getElementById('stealth-ex-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'stealth-ex-container';
+      document.body.appendChild(container);
+    }
+  },
+  
+  clearBlocks: function() {
+    const container = document.getElementById('stealth-ex-container');
+    if (container) {
+      container.innerHTML = '';
+    }
   },
 
-  addQABlock: function(questionId, questionText) {
+  addQABlock: function(questionId, questionText, answerText) {
     const container = document.getElementById('stealth-ex-container');
     if (!container) return;
 
@@ -20,9 +28,15 @@ window.StealthUI = {
     qDiv.textContent = questionText;
 
     const aDiv = document.createElement('div');
-    aDiv.className = 'stealth-ex-loading';
     aDiv.id = `ans-${questionId}`;
-    aDiv.textContent = 'Thinking...';
+    
+    if (answerText) {
+      aDiv.className = 'stealth-ex-answer';
+      aDiv.textContent = answerText;
+    } else {
+      aDiv.className = 'stealth-ex-loading';
+      aDiv.textContent = 'Thinking...';
+    }
 
     block.appendChild(qDiv);
     block.appendChild(aDiv);
