@@ -1,4 +1,5 @@
-const API_KEY = 'YOUR_API_KEY_HERE'; // Replace with your actual OpenAI API Key
+importScripts('config.js');
+const API_KEY = CONFIG.OPENAI_API_KEY;
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'get_answer') {
