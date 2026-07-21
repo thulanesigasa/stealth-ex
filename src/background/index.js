@@ -1,3 +1,5 @@
+const API_KEY = 'YOUR_API_KEY_HERE'; // Replace with your actual OpenAI API Key
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'get_answer') {
     handleQuestion(request.question).then(answer => {
@@ -11,18 +13,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 async function handleQuestion(question) {
-  const result = await chrome.storage.local.get(['openai_api_key']);
-  const apiKey = result.openai_api_key;
-
-  if (!apiKey) {
-    return 'Please set OpenAI API key in options.';
+  if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE') {
+    return 'Please set your OpenAI API key in src/background/index.js';
   }
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`
+      'Authorization': `Bearer ${API_KEY}`
     },
     body: JSON.stringify({
       model: 'gpt-4o',
