@@ -15,22 +15,26 @@ function isElementVisible(el) {
   );
 }
 
+function findQuestionElements() {
+  // Find all elements containing text that ends with a question mark
+  const candidates = Array.from(document.querySelectorAll('*')).filter(el => {
+    const text = (el.innerText || '').trim();
+    return text.endsWith('?') && text.length > 10 && text.length < 500;
+  });
+
+  // Filter out any elements that are just wrappers around another valid question element
+  return candidates.filter(el => {
+    return !candidates.some(other => el !== other && el.contains(other));
+  });
+}
+
 function scanForQuestions() {
-  const elements = document.querySelectorAll('p, h1, h2, h3, h4, h5, div, span, label');
-  
   const visibleQuestions = new Set();
   
-  elements.forEach(el => {
-    // Basic heuristic: no element children to avoid reading a massive block of text as a single question
-    if (el.children.length === 0 && el.textContent) {
-      const text = el.textContent.trim();
-      
-      // Question heuristic: ends with ?, reasonable length
-      if (text.endsWith('?') && text.length > 10 && text.length < 500) {
-        if (isElementVisible(el)) {
-          visibleQuestions.add(text);
-        }
-      }
+  const questionElements = findQuestionElements();
+  questionElements.forEach(el => {
+    if (isElementVisible(el)) {
+      visibleQuestions.add((el.innerText || '').trim());
     }
   });
 
@@ -54,7 +58,7 @@ function scanForQuestions() {
         (response) => {
           let ans = 'Error getting answer.';
           if (chrome.runtime.lastError) {
-             ans = 'Error: Could not contact background worker.';
+             ans = 'Error: Could not contact background worker. Please click the Reload Extension button in the popup.';
           } else if (response && response.answer) {
              ans = response.answer;
           }
@@ -62,7 +66,6 @@ function scanForQuestions() {
           const cacheEntry = questionCache.get(text);
           if (cacheEntry) {
             cacheEntry.answer = ans;
-            // Update UI if it's currently on screen
             window.StealthUI.updateAnswer(cacheEntry.id, ans);
           }
         }
@@ -82,4 +85,12 @@ setTimeout(scanForQuestions, 1000);
 setInterval(scanForQuestions, 2000);
 
 // Bind manual scan request from UI
-window.StealthUI.onScanRequested = scanForQuestions;
+window.StealthUI.onScanRequested = () => {
+  // Clear any failed or pending questions from cache so they get retried
+  for (const [text, data] of questionCache.entries()) {
+    if (!data.answer || data.answer.startsWith('Error')) {
+      questionCache.delete(text);
+    }
+  }
+  scanForQuestions();
+};
