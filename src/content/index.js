@@ -103,6 +103,12 @@ function findQuestionElements() {
 }
 
 function scanForQuestions() {
+  if (window.location.href !== lastLocationHref) {
+    lastLocationHref = window.location.href;
+    lastScannedText = '';
+    window.StealthUI.clearBlocks();
+  }
+
   const candidates = findQuestionElements();
   const visibleQuestions = [];
   
@@ -182,6 +188,7 @@ setTimeout(scanForQuestions, 1000);
 setInterval(scanForQuestions, 200);
 
 let lastScannedText = '';
+let lastLocationHref = window.location.href;
 
 // 1. Resilient Global Mutation Observer on document.body - scans instantly without debouncing delay
 const observer = new MutationObserver(() => {
@@ -210,32 +217,7 @@ observer.observe(document.body, {
   characterData: true
 });
 
-// 2. Intercept History events (pushState/replaceState) for SPAs using client-side routing
-function interceptHistory() {
-  const wrapHistory = (type) => {
-    const orig = history[type];
-    return function() {
-      const res = orig.apply(this, arguments);
-      const ev = new Event(type.toLowerCase());
-      ev.arguments = arguments;
-      window.dispatchEvent(ev);
-      return res;
-    };
-  };
-  
-  history.pushState = wrapHistory('pushState');
-  history.replaceState = wrapHistory('replaceState');
-}
-
-// Inject history interceptors into the webpage context
-const script = document.createElement('script');
-script.textContent = `
-  (${interceptHistory.toString()})();
-`;
-(document.head || document.documentElement).appendChild(script);
-script.remove();
-
-// Listen for history and popstate navigation events to immediately reset UI
+// Listen for standard popstate navigation events to immediately reset UI
 const handleNavigation = () => {
   lastScannedText = '';
   window.StealthUI.clearBlocks();
@@ -243,8 +225,6 @@ const handleNavigation = () => {
 };
 
 window.addEventListener('popstate', handleNavigation);
-window.addEventListener('pushstate', handleNavigation);
-window.addEventListener('replacestate', handleNavigation);
 
 // Bind manual scan request from UI
 window.StealthUI.onScanRequested = () => {
