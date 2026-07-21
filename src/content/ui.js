@@ -1,23 +1,76 @@
 window.StealthUI = {
+  isClosed: false,
+  isMinimized: false,
+  
   createOverlay: function() {
+    if (this.isClosed) return;
+    
     let container = document.getElementById('stealth-ex-container');
     if (!container) {
       container = document.createElement('div');
       container.id = 'stealth-ex-container';
+      
+      const header = document.createElement('div');
+      header.className = 'stealth-ex-header';
+      
+      const title = document.createElement('span');
+      title.textContent = 'Stealth-Ex';
+      
+      const controls = document.createElement('div');
+      controls.className = 'stealth-ex-controls';
+      
+      const minBtn = document.createElement('button');
+      minBtn.innerHTML = '&#9472;'; // simple line
+      minBtn.title = 'Minimize';
+      minBtn.onclick = () => this.toggleMinimize();
+      
+      const closeBtn = document.createElement('button');
+      closeBtn.innerHTML = '&#10005;'; // X mark
+      closeBtn.title = 'Close';
+      closeBtn.onclick = () => this.close();
+      
+      controls.appendChild(minBtn);
+      controls.appendChild(closeBtn);
+      header.appendChild(title);
+      header.appendChild(controls);
+      
+      const content = document.createElement('div');
+      content.id = 'stealth-ex-content';
+      
+      container.appendChild(header);
+      container.appendChild(content);
       document.body.appendChild(container);
     }
   },
   
-  clearBlocks: function() {
+  toggleMinimize: function() {
+    this.isMinimized = !this.isMinimized;
+    const content = document.getElementById('stealth-ex-content');
+    if (content) {
+      content.style.display = this.isMinimized ? 'none' : 'flex';
+    }
+  },
+  
+  close: function() {
+    this.isClosed = true;
     const container = document.getElementById('stealth-ex-container');
     if (container) {
-      container.innerHTML = '';
+      container.remove();
+    }
+  },
+  
+  clearBlocks: function() {
+    if (this.isClosed) return;
+    const content = document.getElementById('stealth-ex-content');
+    if (content) {
+      content.innerHTML = '';
     }
   },
 
   addQABlock: function(questionId, questionText, answerText) {
-    const container = document.getElementById('stealth-ex-container');
-    if (!container) return;
+    if (this.isClosed) return;
+    const content = document.getElementById('stealth-ex-content');
+    if (!content) return;
 
     const block = document.createElement('div');
     block.className = 'stealth-ex-qa-block';
@@ -40,10 +93,11 @@ window.StealthUI = {
 
     block.appendChild(qDiv);
     block.appendChild(aDiv);
-    container.appendChild(block);
+    content.appendChild(block);
   },
 
   updateAnswer: function(questionId, answerText) {
+    if (this.isClosed) return;
     const aDiv = document.getElementById(`ans-${questionId}`);
     if (aDiv) {
       aDiv.className = 'stealth-ex-answer';
