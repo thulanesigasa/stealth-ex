@@ -39,9 +39,13 @@ function findQuestionElements() {
     const text = (el.innerText || '').trim();
     if (text.length < 12 || text.length > 500) return false;
 
-    // Filter out common header/footer/navigation text
-    const isNavOrHeader = /\b(quiz|test|exam|score|time|question\s+no|points|next|previous|submit|quit|exit|menu|nav|navigation|copyright|all\s+rights\s+reserved)\b/i.test(text);
-    if (isNavOrHeader) return false;
+    // Safe blacklist: only discard exact matches for navigation, or very short header/footer patterns
+    const textLower = text.toLowerCase();
+    const exactBlacklist = ['next', 'previous', 'submit', 'quit', 'exit', 'menu', 'nav', 'navigation', 'back', 'skip', 'continue', 'quit quiz', 'submit quiz'];
+    if (exactBlacklist.includes(textLower)) return false;
+    
+    if (/^(question\s+no|time|score|points|timer)/i.test(text) && text.length < 30) return false;
+    if (/(quiz|test|exam)/i.test(text) && text.length < 30) return false;
 
     // Must not be an interactive option or button
     let current = el;
