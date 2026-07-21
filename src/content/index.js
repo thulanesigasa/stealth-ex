@@ -56,27 +56,46 @@ function scanForQuestions() {
       questionCache.set(text, { id: questionId, answer: null });
       
       // Request answer from background with full page context for matching questions
-      chrome.runtime.sendMessage(
-        { 
-          action: 'get_answer', 
-          question: text,
-          context: document.body.innerText 
-        },
-        (response) => {
-          let ans = 'Error getting answer.';
-          if (chrome.runtime.lastError) {
-             ans = 'Error: Could not contact background worker. Please click the Reload Extension button in the popup.';
-          } else if (response && response.answer) {
-             ans = response.answer;
+      try {
+        chrome.runtime.sendMessage(
+          { 
+            action: 'get_answer', 
+            question: text,
+            context: document.body.innerText || ''
+          },
+          (response) => {
+            let ans = 'Error getting answer.';
+            if (chrome.runtime.lastError) {
+               ans = 'Error: Could not contact worker. Please refresh the page.';
+            } else if (response && response.answer) {
+               ans = response.answer;
+            }
+            
+            const cacheEntry = questionCache.get(text);
+            if (cacheEntry) {
+              cacheEntry.answer = ans;
+              window.StealthUI.updateAnswer(cacheEntry.id, ans);
+            }
           }
-          
-          const cacheEntry = questionCache.get(text);
-          if (cacheEntry) {
-            cacheEntry.answer = ans;
-            window.StealthUI.updateAnswer(cacheEntry.id, ans);
+        );
+
+        // Watchdog timeout to prevent infinite hanging
+        setTimeout(() => {
+          const check = questionCache.get(text);
+          if (check && !check.answer) {
+            check.answer = 'Error: API request timed out (15s). Try Scan Now.';
+            window.StealthUI.updateAnswer(check.id, check.answer);
           }
+        }, 15000);
+
+      } catch (err) {
+        // This catches "Extension context invalidated" if the user reloaded the extension
+        const cacheEntry = questionCache.get(text);
+        if (cacheEntry) {
+          cacheEntry.answer = 'Error: Extension was reloaded. Please refresh this webpage.';
+          window.StealthUI.updateAnswer(cacheEntry.id, cacheEntry.answer);
         }
-      );
+      }
     }
     
     // Add the block (it will use the cached answer if available, or 'Thinking...' if null)
