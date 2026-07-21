@@ -38,7 +38,8 @@ function findQuestionElements() {
   // Find all elements containing text that ends with a question mark
   const candidates = Array.from(document.querySelectorAll('*')).filter(el => {
     const text = (el.innerText || '').trim();
-    const isQuestion = text.endsWith('?') || text.endsWith(':') || /^(match|select|choose|identify|which|what|evaluate|solve|true or false|arrange|order)/i.test(text);
+    // Match questions ending in ? OR starting with a question word (even if prefixed by a number like "2 ")
+    const isQuestion = text.endsWith('?') || /^\s*(\d+[\.\)]?\s*)?(match|select|choose|identify|which|what|how|why|when|where|evaluate|solve|true|false|arrange|order|steps?)\b/i.test(text);
     return isQuestion && text.length > 10 && text.length < 500;
   });
 
