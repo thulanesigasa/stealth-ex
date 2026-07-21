@@ -1,4 +1,4 @@
-importScripts('config.js');
+import { CONFIG } from './config.js';
 const API_KEY = CONFIG.OPENAI_API_KEY;
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
