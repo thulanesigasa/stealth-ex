@@ -4,17 +4,30 @@ const questionCache = new Map(); // text -> { id, answer }
 
 function isElementVisible(el) {
   const rect = el.getBoundingClientRect();
-  return (
-    rect.width > 0 &&
-    rect.height > 0 &&
+  
+  // Basic geometry checks
+  if (!(
+    rect.width > 5 &&
+    rect.height > 5 &&
     rect.top < (window.innerHeight || document.documentElement.clientHeight) &&
     rect.bottom > 0 &&
     rect.left < (window.innerWidth || document.documentElement.clientWidth) &&
-    rect.right > 0 &&
-    window.getComputedStyle(el).visibility !== 'hidden' &&
-    window.getComputedStyle(el).opacity !== '0' &&
-    window.getComputedStyle(el).display !== 'none'
-  );
+    rect.right > 0
+  )) {
+    return false;
+  }
+
+  // Walk up the DOM tree to ensure no parent wrapper is hidden or faded out
+  let current = el;
+  while (current && current !== document.body && current !== document.documentElement) {
+    const style = window.getComputedStyle(current);
+    if (style.opacity < 0.05 || style.visibility === 'hidden' || style.display === 'none') {
+      return false;
+    }
+    current = current.parentElement;
+  }
+
+  return true;
 }
 
 function findQuestionElements() {
