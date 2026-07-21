@@ -19,6 +19,15 @@ window.StealthUI = {
       const controls = document.createElement('div');
       controls.className = 'stealth-ex-controls';
       
+      const scanBtn = document.createElement('button');
+      scanBtn.innerHTML = '&#8635;'; // refresh symbol
+      scanBtn.title = 'Scan Now';
+      scanBtn.onclick = () => {
+        if (typeof this.onScanRequested === 'function') {
+          this.onScanRequested();
+        }
+      };
+      
       const minBtn = document.createElement('button');
       minBtn.innerHTML = '&#9472;'; // simple line
       minBtn.title = 'Minimize';
@@ -29,6 +38,7 @@ window.StealthUI = {
       closeBtn.title = 'Close';
       closeBtn.onclick = () => this.close();
       
+      controls.appendChild(scanBtn);
       controls.appendChild(minBtn);
       controls.appendChild(closeBtn);
       header.appendChild(title);
