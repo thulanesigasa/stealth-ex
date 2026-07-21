@@ -179,19 +179,29 @@ function scanForQuestions() {
 setTimeout(scanForQuestions, 1000);
 
 // Periodically check for dynamically added/removed questions (fallback)
-setInterval(scanForQuestions, 1000);
+setInterval(scanForQuestions, 1500);
 
-// Implement MutationObserver to instantly detect SPA DOM changes/transitions
 let lastScannedText = '';
-const observer = new MutationObserver(() => {
-  // Quickly gather candidates to see if question text has changed, avoiding heavy layout thrashing
+
+// Helper to debounce callbacks to avoid layout thrashing and duplicate API requests
+function debounce(func, wait) {
+  let timeout;
+  return function(...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), wait);
+  };
+}
+
+// Resilient scan trigger
+const triggerScan = debounce(() => {
   const candidates = findQuestionElements();
   const visible = candidates.filter(isElementVisible);
+  
   if (visible.length > 0) {
     const text = (visible[visible.length - 1].innerText || '').trim();
     if (text !== lastScannedText) {
       lastScannedText = text;
-      // Immediately clear the UI so it doesn't get stuck showing the old question/answer
+      // IMMEDIATE ACTION: Reset old blocks from the UI
       window.StealthUI.clearBlocks();
       scanForQuestions();
     }
@@ -201,6 +211,11 @@ const observer = new MutationObserver(() => {
       window.StealthUI.clearBlocks();
     }
   }
+}, 250);
+
+// 1. Resilient Global Mutation Observer on document.body
+const observer = new MutationObserver(() => {
+  triggerScan();
 });
 
 observer.observe(document.body, {
@@ -208,6 +223,42 @@ observer.observe(document.body, {
   subtree: true,
   characterData: true
 });
+
+// 2. Intercept History events (pushState/replaceState) for SPAs using client-side routing
+function interceptHistory() {
+  const wrapHistory = (type) => {
+    const orig = history[type];
+    return function() {
+      const res = orig.apply(this, arguments);
+      const ev = new Event(type.toLowerCase());
+      ev.arguments = arguments;
+      window.dispatchEvent(ev);
+      return res;
+    };
+  };
+  
+  history.pushState = wrapHistory('pushState');
+  history.replaceState = wrapHistory('replaceState');
+}
+
+// Inject history interceptors into the webpage context
+const script = document.createElement('script');
+script.textContent = `
+  (${interceptHistory.toString()})();
+`;
+(document.head || document.documentElement).appendChild(script);
+script.remove();
+
+// Listen for history and popstate navigation events to immediately reset UI
+const handleNavigation = () => {
+  lastScannedText = '';
+  window.StealthUI.clearBlocks();
+  triggerScan();
+};
+
+window.addEventListener('popstate', handleNavigation);
+window.addEventListener('pushstate', handleNavigation);
+window.addEventListener('replacestate', handleNavigation);
 
 // Bind manual scan request from UI
 window.StealthUI.onScanRequested = () => {
