@@ -1,0 +1,1 @@
+// UI rendering logic for content script
