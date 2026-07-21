@@ -9,6 +9,8 @@ function isElementVisible(el) {
     rect.height > 0 &&
     rect.top < (window.innerHeight || document.documentElement.clientHeight) &&
     rect.bottom > 0 &&
+    rect.left < (window.innerWidth || document.documentElement.clientWidth) &&
+    rect.right > 0 &&
     window.getComputedStyle(el).visibility !== 'hidden' &&
     window.getComputedStyle(el).opacity !== '0' &&
     window.getComputedStyle(el).display !== 'none'
@@ -19,7 +21,8 @@ function findQuestionElements() {
   // Find all elements containing text that ends with a question mark
   const candidates = Array.from(document.querySelectorAll('*')).filter(el => {
     const text = (el.innerText || '').trim();
-    return text.endsWith('?') && text.length > 10 && text.length < 500;
+    const isQuestion = text.endsWith('?') || text.endsWith(':') || /^(match|select|choose|identify|which|what)/i.test(text);
+    return isQuestion && text.length > 10 && text.length < 500;
   });
 
   // Filter out any elements that are just wrappers around another valid question element
@@ -52,9 +55,13 @@ function scanForQuestions() {
       const questionId = Date.now().toString() + Math.floor(Math.random() * 1000);
       questionCache.set(text, { id: questionId, answer: null });
       
-      // Request answer from background
+      // Request answer from background with full page context for matching questions
       chrome.runtime.sendMessage(
-        { action: 'get_answer', question: text },
+        { 
+          action: 'get_answer', 
+          question: text,
+          context: document.body.innerText 
+        },
         (response) => {
           let ans = 'Error getting answer.';
           if (chrome.runtime.lastError) {
