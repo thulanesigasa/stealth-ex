@@ -17,10 +17,45 @@
   z-index: 2147483647;
   font-family: 'Inter', sans-serif;
   color: #f8fafc;
+  pointer-events: auto;
+}
+
+.stealth-ex-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.stealth-ex-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.stealth-ex-controls button {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.stealth-ex-controls button:hover {
+  color: #f8fafc;
+}
+
+#stealth-ex-content {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  pointer-events: auto;
 }
 
 .stealth-ex-qa-block {
