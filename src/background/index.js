@@ -32,7 +32,7 @@ async function handleQuestion(question, context = '') {
       messages: [
         {
           role: 'system',
-          content: 'You are an expert test solver. You will be provided with a specific question and the full text of the current webpage for context. Solve the specific question using the provided context (which contains multiple choice options, dropzones, or matching items). Output ONLY the direct answer or the correct matching pairs. Format cleanly. Do not provide any explanation or read back the question.'
+          content: 'You are an expert test solver. You will be provided with a specific question and the full text of the current webpage for context. Solve the specific question using the provided context (which contains multiple choice options, dropzones, or items to order). Output ONLY the direct answer, the correct matching pairs, or the correctly ordered list. Format cleanly. Do not provide any explanation or read back the question.'
         },
         {
           role: 'user',
