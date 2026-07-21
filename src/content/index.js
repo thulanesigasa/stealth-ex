@@ -159,7 +159,7 @@ function scanForQuestions() {
 setTimeout(scanForQuestions, 1000);
 
 // Periodically check for dynamically added/removed questions
-setInterval(scanForQuestions, 2000);
+setInterval(scanForQuestions, 500);
 
 // Bind manual scan request from UI
 window.StealthUI.onScanRequested = () => {
