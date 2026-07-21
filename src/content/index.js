@@ -24,6 +24,10 @@ function isElementVisible(el) {
     if (style.opacity < 0.05 || style.visibility === 'hidden' || style.display === 'none') {
       return false;
     }
+    // Check for common inactive carousel slide attributes
+    if (current.getAttribute('aria-hidden') === 'true' || style.pointerEvents === 'none') {
+      return false;
+    }
     current = current.parentElement;
   }
 
@@ -34,7 +38,7 @@ function findQuestionElements() {
   // Find all elements containing text that ends with a question mark
   const candidates = Array.from(document.querySelectorAll('*')).filter(el => {
     const text = (el.innerText || '').trim();
-    const isQuestion = text.endsWith('?') || text.endsWith(':') || /^(match|select|choose|identify|which|what)/i.test(text);
+    const isQuestion = text.endsWith('?') || text.endsWith(':') || /^(match|select|choose|identify|which|what|evaluate|solve|true or false)/i.test(text);
     return isQuestion && text.length > 10 && text.length < 500;
   });
 
@@ -45,25 +49,25 @@ function findQuestionElements() {
 }
 
 function scanForQuestions() {
-  const visibleQuestions = new Set();
+  const candidates = findQuestionElements();
+  const visibleQuestions = [];
   
-  const questionElements = findQuestionElements();
-  questionElements.forEach(el => {
+  candidates.forEach(el => {
     if (isElementVisible(el)) {
-      visibleQuestions.add((el.innerText || '').trim());
+      const text = (el.innerText || '').trim();
+      if (!visibleQuestions.includes(text)) {
+        visibleQuestions.push(text);
+      }
     }
   });
 
-  // If no questions are visible, clear the overlay
-  if (visibleQuestions.size === 0) {
-    window.StealthUI.clearBlocks();
-    return;
-  }
-
-  // Clear UI and rebuild with only currently visible questions
   window.StealthUI.clearBlocks();
 
-  visibleQuestions.forEach(text => {
+  // STRICT LIMIT: Only display the LAST valid question found in the DOM.
+  // This permanently eliminates ghost slide stacking in modern SPAs/carousels.
+  if (visibleQuestions.length > 0) {
+    const text = visibleQuestions[visibleQuestions.length - 1];
+
     if (!questionCache.has(text)) {
       const questionId = Date.now().toString() + Math.floor(Math.random() * 1000);
       questionCache.set(text, { id: questionId, answer: null });
@@ -114,7 +118,7 @@ function scanForQuestions() {
     // Add the block (it will use the cached answer if available, or 'Thinking...' if null)
     const cacheData = questionCache.get(text);
     window.StealthUI.addQABlock(cacheData.id, text, cacheData.answer);
-  });
+  }
 }
 
 // Initial scan
