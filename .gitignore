@@ -3,3 +3,4 @@ node_modules/
 .DS_Store
 .env
 src/background/config.js
+src/background/config.json

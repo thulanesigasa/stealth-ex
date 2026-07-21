@@ -1,5 +1,17 @@
-import { CONFIG } from './config.js';
-const API_KEY = CONFIG.OPENAI_API_KEY;
+let API_KEY = '';
+
+async function loadApiKey() {
+  try {
+    const response = await fetch(chrome.runtime.getURL('src/background/config.json'));
+    const config = await response.json();
+    API_KEY = config.OPENAI_API_KEY;
+  } catch (err) {
+    console.error('Failed to load API key from config.json:', err);
+  }
+}
+
+// Initial load
+loadApiKey();
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'get_answer') {
@@ -14,8 +26,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 async function handleQuestion(question, context = '') {
+  if (!API_KEY) {
+    await loadApiKey();
+  }
   if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE') {
-    return 'Please set your OpenAI API key in src/background/config.js';
+    return 'Please set your OpenAI API key in src/background/config.json';
   }
 
   // Cap context length to avoid token limits for very large pages
