@@ -54,8 +54,9 @@ function findQuestionElements() {
     const exactBlacklist = ['next', 'previous', 'submit', 'quit', 'exit', 'menu', 'nav', 'navigation', 'back', 'skip', 'continue', 'quit quiz', 'submit quiz', 'skip question'];
     if (exactBlacklist.includes(textLower)) return false;
     
-    // Ignore breadcrumbs, navigation headings, prerequisites, and progress text
-    if (/^(go to|module|chapter|unit|section|lesson|page|index|summary|table of contents|pre-requisite|prerequisite|course|instructions)/i.test(text)) return false;
+    // Ignore breadcrumbs, navigation headings, prerequisites, tabs, and multi-line menu summaries
+    if (/^(go to|module|chapter|unit|section|lesson|page|index|summary|table of contents|pre-requisite|prerequisite|course|instructions|assignments|content|gradebook|announcement)/i.test(text)) return false;
+    if (/\b(assignments|gradebook|announcements)\b/i.test(text)) return false;
     if (/^(question\s+\d+|time|score|points|timer)/i.test(text) && text.length < 35) return false;
     if (/(quiz|test|exam|checkpoint)/i.test(text) && text.length < 35) return false;
 
@@ -76,10 +77,14 @@ function findQuestionElements() {
         tagName === 'label' ||
         tagName === 'nav' ||
         tagName === 'footer' ||
+        tagName === 'header' ||
         current.getAttribute('role') === 'button' ||
         current.getAttribute('role') === 'radio' ||
         current.getAttribute('role') === 'checkbox' ||
-        current.getAttribute('role') === 'option'
+        current.getAttribute('role') === 'option' ||
+        current.getAttribute('role') === 'tab' ||
+        current.getAttribute('role') === 'tablist' ||
+        current.getAttribute('role') === 'navigation'
       ) {
         return false;
       }
@@ -93,17 +98,16 @@ function findQuestionElements() {
         className.includes('drag') ||
         className.includes('drop') ||
         className.includes('answer') ||
-        className.includes('breadcrumb')
+        className.includes('breadcrumb') ||
+        className.includes('nav') ||
+        className.includes('tab') ||
+        className.includes('menu') ||
+        className.includes('header') ||
+        className.includes('footer')
       ) {
         return false;
       }
       current = current.parentElement;
-    }
-
-    // Check specific navigation classes only on the element itself
-    const elClass = (el.className || '').toString().toLowerCase();
-    if (elClass.includes('nav') || elClass.includes('menu') || elClass.includes('footer') || elClass.includes('breadcrumb')) {
-      return false;
     }
 
     // 4. Must look like a sentence or instruction (at least 2 words and contains letters)
@@ -140,11 +144,20 @@ function scanForQuestions() {
   });
 
   if (visibleCandidates.length > 0) {
-    // Prioritize candidates that end with '?' or start with question words
-    let bestMatch = visibleCandidates.find(c => 
-      c.text.trim().endsWith('?') || 
-      /^(which|what|why|how|when|where|who|select|choose|identify|match|true|false)\b/i.test(c.text.trim())
-    );
+    // 1. First priority: Candidates that end with '?'
+    let bestMatch = visibleCandidates.find(c => c.text.trim().endsWith('?'));
+
+    // 2. Second priority: Candidates starting with question keywords
+    if (!bestMatch) {
+      bestMatch = visibleCandidates.find(c => 
+        /^(which|what|why|how|when|where|who|select|choose|identify|match|true|false)\b/i.test(c.text.trim())
+      );
+    }
+
+    // 3. Fallback to candidate containing a question mark anywhere
+    if (!bestMatch) {
+      bestMatch = visibleCandidates.find(c => c.text.includes('?'));
+    }
 
     // Fallback to the candidate highest up in DOM (or main content area)
     if (!bestMatch) {
