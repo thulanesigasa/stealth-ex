@@ -49,13 +49,15 @@ function findQuestionElements() {
     const text = (el.innerText || '').trim();
     if (text.length < 10 || text.length > 500) return false;
 
-    // 2. Filter out common header/footer/navigation text
+    // 2. Filter out common header/footer/navigation text & breadcrumbs
     const textLower = text.toLowerCase();
     const exactBlacklist = ['next', 'previous', 'submit', 'quit', 'exit', 'menu', 'nav', 'navigation', 'back', 'skip', 'continue', 'quit quiz', 'submit quiz', 'skip question'];
     if (exactBlacklist.includes(textLower)) return false;
     
-    if (/^(question\s+no|time|score|points|timer)/i.test(text) && text.length < 30) return false;
-    if (/(quiz|test|exam)/i.test(text) && text.length < 30) return false;
+    // Ignore breadcrumbs, navigation headings, and progress text
+    if (/^(go to|module|chapter|unit|section|lesson|page|index|summary|table of contents)/i.test(text)) return false;
+    if (/^(question\s+\d+|time|score|points|timer)/i.test(text) && text.length < 35) return false;
+    if (/(quiz|test|exam|checkpoint)/i.test(text) && text.length < 35) return false;
 
     // 3. Must not be an interactive option, button, label, or choice
     let current = el;
@@ -88,7 +90,11 @@ function findQuestionElements() {
         className.includes('button') ||
         className.includes('drag') ||
         className.includes('drop') ||
-        className.includes('answer')
+        className.includes('answer') ||
+        className.includes('nav') ||
+        className.includes('menu') ||
+        className.includes('header') ||
+        className.includes('footer')
       ) {
         return false;
       }
@@ -117,20 +123,30 @@ function scanForQuestions() {
   }
 
   const candidates = findQuestionElements();
-  const visibleQuestions = [];
+  const visibleCandidates = [];
   
   candidates.forEach(el => {
     if (isElementVisible(el)) {
       const text = (el.innerText || '').trim();
-      if (!visibleQuestions.includes(text)) {
-        visibleQuestions.push(text);
+      if (!visibleCandidates.some(c => c.text === text)) {
+        visibleCandidates.push({ el, text });
       }
     }
   });
 
-  // Pick ONLY the single active main question on the current screen (the last valid candidate in DOM order)
-  if (visibleQuestions.length > 0) {
-    const text = visibleQuestions[visibleQuestions.length - 1];
+  if (visibleCandidates.length > 0) {
+    // Prioritize candidates that end with '?' or start with question words
+    let bestMatch = visibleCandidates.find(c => 
+      c.text.trim().endsWith('?') || 
+      /^(which|what|why|how|when|where|who|select|choose|identify|match|true|false)\b/i.test(c.text.trim())
+    );
+
+    // Fallback to the candidate highest up in DOM (or main content area)
+    if (!bestMatch) {
+      bestMatch = visibleCandidates[0];
+    }
+
+    const text = bestMatch.text;
 
     if (!questionCache.has(text)) {
       const questionId = Date.now().toString() + Math.floor(Math.random() * 1000);
@@ -200,7 +216,12 @@ const observer = new MutationObserver(() => {
   const visible = candidates.filter(isElementVisible);
   
   if (visible.length > 0) {
-    const text = (visible[visible.length - 1].innerText || '').trim();
+    let bestMatch = visible.find(el => {
+      const txt = (el.innerText || '').trim();
+      return txt.endsWith('?') || /^(which|what|why|how|when|where|who|select|choose|identify|match|true|false)\b/i.test(txt);
+    }) || visible[0];
+
+    const text = (bestMatch.innerText || '').trim();
     if (text !== lastScannedText) {
       lastScannedText = text;
       // IMMEDIATE ACTION: Reset old blocks from the UI
