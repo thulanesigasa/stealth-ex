@@ -284,19 +284,10 @@ window.StealthUI = {
     const content = this.shadowRoot.getElementById('stealth-ex-content');
     if (!content) return;
 
-    // If block already exists, bring it to the top (active question) and update it
-    let block = this.shadowRoot.getElementById(`qa-${questionId}`);
-    if (block) {
-      const aDiv = this.shadowRoot.getElementById(`ans-${questionId}`);
-      if (aDiv && answerText) {
-        aDiv.className = 'stealth-ex-answer';
-        aDiv.textContent = answerText;
-      }
-      content.prepend(block);
-      return;
-    }
+    // STRICT 1-QUESTION DISPLAY: Clear out any previous question blocks
+    content.innerHTML = '';
 
-    block = document.createElement('div');
+    const block = document.createElement('div');
     block.className = 'stealth-ex-qa-block';
     block.id = `qa-${questionId}`;
 
@@ -317,14 +308,7 @@ window.StealthUI = {
 
     block.appendChild(qDiv);
     block.appendChild(aDiv);
-    
-    // Prepend to top so the newest question is always above the previous ones
-    content.prepend(block);
-
-    // Limit history log to the last 15 questions to keep it lightweight
-    while (content.children.length > 15) {
-      content.removeChild(content.lastChild);
-    }
+    content.appendChild(block);
   },
 
   updateAnswer: function(questionId, answerText) {
