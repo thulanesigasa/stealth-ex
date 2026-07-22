@@ -31,23 +31,22 @@ window.StealthUI = {
           max-height: 82vh;
           display: flex;
           flex-direction: column;
-          /* True translucent frosted glass background */
-          background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.03) 100%), rgba(15, 23, 42, 0.45);
-          backdrop-filter: blur(30px) saturate(210%);
-          -webkit-backdrop-filter: blur(30px) saturate(210%);
-          /* Metallic glass reflection border */
-          border: 1px solid rgba(255, 255, 255, 0.28);
-          /* Glossy specular top sheen */
+          /* Translucent glossy white glass background */
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.88) 0%, rgba(248, 250, 252, 0.72) 100%);
+          backdrop-filter: blur(28px) saturate(200%);
+          -webkit-backdrop-filter: blur(28px) saturate(200%);
+          /* White glass border */
+          border: 1px solid rgba(255, 255, 255, 0.9);
+          /* Glossy specular shadow */
           box-shadow: 
-            0 30px 60px -12px rgba(0, 0, 0, 0.45), 
-            0 0 0 1px rgba(255, 255, 255, 0.1),
-            inset 0 1px 1px 0 rgba(255, 255, 255, 0.5),
-            inset 0 -1px 1px 0 rgba(0, 0, 0, 0.2);
+            0 24px 48px -12px rgba(15, 23, 42, 0.15), 
+            0 0 0 1px rgba(226, 232, 240, 0.6),
+            inset 0 1px 1px 0 rgba(255, 255, 255, 1);
           border-radius: 22px;
           padding: 18px 20px;
           z-index: 2147483647;
           font-family: 'Inter', system-ui, -apple-system, sans-serif;
-          color: #ffffff;
+          color: #0f172a;
           pointer-events: auto;
           user-select: none;
           box-sizing: border-box;
@@ -60,7 +59,7 @@ window.StealthUI = {
           align-items: center;
           margin-bottom: 14px;
           padding-bottom: 12px;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+          border-bottom: 1px solid rgba(226, 232, 240, 0.8);
         }
 
         .stealth-ex-title-badge {
@@ -70,9 +69,8 @@ window.StealthUI = {
           font-size: 13px;
           font-weight: 700;
           letter-spacing: 0.04em;
-          color: #38bdf8;
+          color: #0284c7;
           text-transform: uppercase;
-          text-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
         }
 
         .stealth-ex-title-dot {
@@ -89,9 +87,9 @@ window.StealthUI = {
         }
 
         .stealth-ex-controls button {
-          background: rgba(255, 255, 255, 0.1);
-          border: 1px solid rgba(255, 255, 255, 0.18);
-          color: #cbd5e1;
+          background: rgba(15, 23, 42, 0.04);
+          border: 1px solid rgba(15, 23, 42, 0.08);
+          color: #64748b;
           cursor: pointer;
           width: 28px;
           height: 28px;
@@ -104,10 +102,9 @@ window.StealthUI = {
         }
 
         .stealth-ex-controls button:hover {
-          background: rgba(255, 255, 255, 0.25);
-          color: #ffffff;
-          border-color: rgba(255, 255, 255, 0.4);
-          box-shadow: 0 0 12px rgba(255, 255, 255, 0.2);
+          background: rgba(15, 23, 42, 0.08);
+          color: #0f172a;
+          border-color: rgba(15, 23, 42, 0.15);
         }
 
         #stealth-ex-content {
@@ -125,22 +122,21 @@ window.StealthUI = {
           background: transparent;
         }
         #stealth-ex-content::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.25);
+          background: rgba(15, 23, 42, 0.15);
           border-radius: 10px;
         }
         #stealth-ex-content::-webkit-scrollbar-thumb:hover {
-          background: rgba(255, 255, 255, 0.45);
+          background: rgba(15, 23, 42, 0.3);
         }
 
         .stealth-ex-qa-block {
           display: flex;
           flex-direction: column;
           gap: 12px;
-          background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(15, 23, 42, 0.35);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          border: 1px solid rgba(255, 255, 255, 0.16);
-          box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+          background: rgba(255, 255, 255, 0.65);
+          backdrop-filter: blur(12px);
+          border: 1px solid rgba(226, 232, 240, 0.8);
+          box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.04);
           padding: 14px 16px;
           border-radius: 16px;
           transition: transform 0.2s ease, border-color 0.2s ease;
@@ -148,33 +144,30 @@ window.StealthUI = {
 
         .stealth-ex-qa-block:first-child {
           border: 1px solid rgba(56, 189, 248, 0.5);
-          background: linear-gradient(135deg, rgba(56, 189, 248, 0.12) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(15, 23, 42, 0.45);
+          background: rgba(240, 249, 255, 0.85);
           box-shadow: 
-            0 8px 24px -6px rgba(56, 189, 248, 0.25),
-            inset 0 1px 1px 0 rgba(255, 255, 255, 0.35);
+            0 8px 24px -6px rgba(56, 189, 248, 0.15),
+            inset 0 1px 1px 0 rgba(255, 255, 255, 1);
         }
 
         .stealth-ex-question {
           font-weight: 600;
           font-size: 13.5px;
           line-height: 1.45;
-          color: #ffffff;
-          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+          color: #0f172a;
         }
 
         .stealth-ex-answer {
           font-weight: 600;
           font-size: 13.5px;
           line-height: 1.5;
-          color: #34d399;
+          color: #059669;
           display: flex;
           align-items: flex-start;
           gap: 8px;
           white-space: pre-wrap;
-          background: rgba(16, 185, 129, 0.12);
-          backdrop-filter: blur(8px);
-          border: 1px solid rgba(16, 185, 129, 0.35);
-          box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+          background: rgba(16, 185, 129, 0.1);
+          border: 1px solid rgba(16, 185, 129, 0.25);
           padding: 10px 14px;
           border-radius: 12px;
         }
@@ -182,12 +175,12 @@ window.StealthUI = {
         .stealth-ex-answer::before {
           content: '✔';
           font-size: 13.5px;
-          color: #34d399;
+          color: #059669;
         }
 
         .stealth-ex-loading {
           font-size: 12px;
-          color: #cbd5e1;
+          color: #64748b;
           font-style: italic;
           display: flex;
           align-items: center;
