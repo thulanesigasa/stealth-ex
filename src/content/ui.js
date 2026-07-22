@@ -27,23 +27,27 @@ window.StealthUI = {
           position: fixed;
           top: 24px;
           right: 24px;
-          width: 360px;
+          width: 365px;
           max-height: 82vh;
           display: flex;
           flex-direction: column;
-          background: radial-gradient(135% 135% at 0% 0%, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%);
-          backdrop-filter: blur(24px) saturate(200%);
-          -webkit-backdrop-filter: blur(24px) saturate(200%);
-          border: 1px solid rgba(255, 255, 255, 0.12);
+          /* True translucent frosted glass background */
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.03) 100%), rgba(15, 23, 42, 0.45);
+          backdrop-filter: blur(30px) saturate(210%);
+          -webkit-backdrop-filter: blur(30px) saturate(210%);
+          /* Metallic glass reflection border */
+          border: 1px solid rgba(255, 255, 255, 0.28);
+          /* Glossy specular top sheen */
           box-shadow: 
-            0 24px 48px -12px rgba(0, 0, 0, 0.75), 
-            0 0 0 1px rgba(255, 255, 255, 0.05),
-            inset 0 1px 1px 0 rgba(255, 255, 255, 0.2);
-          border-radius: 20px;
-          padding: 16px 18px;
+            0 30px 60px -12px rgba(0, 0, 0, 0.45), 
+            0 0 0 1px rgba(255, 255, 255, 0.1),
+            inset 0 1px 1px 0 rgba(255, 255, 255, 0.5),
+            inset 0 -1px 1px 0 rgba(0, 0, 0, 0.2);
+          border-radius: 22px;
+          padding: 18px 20px;
           z-index: 2147483647;
           font-family: 'Inter', system-ui, -apple-system, sans-serif;
-          color: #f8fafc;
+          color: #ffffff;
           pointer-events: auto;
           user-select: none;
           box-sizing: border-box;
@@ -54,9 +58,9 @@ window.StealthUI = {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 12px;
-          padding-bottom: 10px;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+          margin-bottom: 14px;
+          padding-bottom: 12px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.12);
         }
 
         .stealth-ex-title-badge {
@@ -65,17 +69,18 @@ window.StealthUI = {
           gap: 8px;
           font-size: 13px;
           font-weight: 700;
-          letter-spacing: 0.03em;
+          letter-spacing: 0.04em;
           color: #38bdf8;
           text-transform: uppercase;
+          text-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
         }
 
         .stealth-ex-title-dot {
-          width: 7px;
-          height: 7px;
+          width: 8px;
+          height: 8px;
           background-color: #10b981;
           border-radius: 50%;
-          box-shadow: 0 0 8px #10b981;
+          box-shadow: 0 0 10px #10b981;
         }
 
         .stealth-ex-controls {
@@ -84,13 +89,13 @@ window.StealthUI = {
         }
 
         .stealth-ex-controls button {
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          color: #94a3b8;
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.18);
+          color: #cbd5e1;
           cursor: pointer;
-          width: 26px;
-          height: 26px;
-          border-radius: 8px;
+          width: 28px;
+          height: 28px;
+          border-radius: 9px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -99,15 +104,16 @@ window.StealthUI = {
         }
 
         .stealth-ex-controls button:hover {
-          background: rgba(255, 255, 255, 0.15);
-          color: #f8fafc;
-          border-color: rgba(255, 255, 255, 0.2);
+          background: rgba(255, 255, 255, 0.25);
+          color: #ffffff;
+          border-color: rgba(255, 255, 255, 0.4);
+          box-shadow: 0 0 12px rgba(255, 255, 255, 0.2);
         }
 
         #stealth-ex-content {
           display: flex;
           flex-direction: column;
-          gap: 12px;
+          gap: 14px;
           overflow-y: auto;
           padding-right: 4px;
         }
@@ -119,61 +125,69 @@ window.StealthUI = {
           background: transparent;
         }
         #stealth-ex-content::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.15);
+          background: rgba(255, 255, 255, 0.25);
           border-radius: 10px;
         }
         #stealth-ex-content::-webkit-scrollbar-thumb:hover {
-          background: rgba(255, 255, 255, 0.3);
+          background: rgba(255, 255, 255, 0.45);
         }
 
         .stealth-ex-qa-block {
           display: flex;
           flex-direction: column;
-          gap: 10px;
-          background: rgba(15, 23, 42, 0.65);
-          backdrop-filter: blur(12px);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          padding: 14px;
-          border-radius: 14px;
+          gap: 12px;
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(15, 23, 42, 0.35);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          border: 1px solid rgba(255, 255, 255, 0.16);
+          box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+          padding: 14px 16px;
+          border-radius: 16px;
           transition: transform 0.2s ease, border-color 0.2s ease;
         }
 
         .stealth-ex-qa-block:first-child {
-          border-color: rgba(56, 189, 248, 0.4);
-          box-shadow: 0 4px 20px -4px rgba(56, 189, 248, 0.2);
+          border: 1px solid rgba(56, 189, 248, 0.5);
+          background: linear-gradient(135deg, rgba(56, 189, 248, 0.12) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(15, 23, 42, 0.45);
+          box-shadow: 
+            0 8px 24px -6px rgba(56, 189, 248, 0.25),
+            inset 0 1px 1px 0 rgba(255, 255, 255, 0.35);
         }
 
         .stealth-ex-question {
           font-weight: 600;
-          font-size: 13px;
+          font-size: 13.5px;
           line-height: 1.45;
-          color: #f1f5f9;
+          color: #ffffff;
+          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
         }
 
         .stealth-ex-answer {
           font-weight: 600;
-          font-size: 13px;
+          font-size: 13.5px;
           line-height: 1.5;
           color: #34d399;
           display: flex;
           align-items: flex-start;
           gap: 8px;
           white-space: pre-wrap;
-          background: rgba(16, 185, 129, 0.1);
-          border: 1px solid rgba(16, 185, 129, 0.25);
-          padding: 10px 12px;
-          border-radius: 10px;
+          background: rgba(16, 185, 129, 0.12);
+          backdrop-filter: blur(8px);
+          border: 1px solid rgba(16, 185, 129, 0.35);
+          box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+          padding: 10px 14px;
+          border-radius: 12px;
         }
 
         .stealth-ex-answer::before {
           content: '✔';
-          font-size: 13px;
+          font-size: 13.5px;
           color: #34d399;
         }
 
         .stealth-ex-loading {
           font-size: 12px;
-          color: #94a3b8;
+          color: #cbd5e1;
           font-style: italic;
           display: flex;
           align-items: center;
