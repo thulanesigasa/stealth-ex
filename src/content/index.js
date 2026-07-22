@@ -60,49 +60,36 @@ function findQuestionElements() {
     if (/^(question\s+\d+|time|score|points|timer)/i.test(text) && text.length < 35) return false;
     if (/(quiz|test|exam|checkpoint)/i.test(text) && text.length < 35) return false;
 
-    // 3. Must not be an interactive option, button, label, or choice
-    let current = el;
-    while (current && current !== document.body) {
-      if (current.id === 'stealth-ex-container') return false;
-
-      const style = window.getComputedStyle(current);
-      if (style.cursor === 'pointer' || style.cursor === 'grab' || style.cursor === 'grabbing') {
-        return false;
-      }
-      const tagName = current.tagName.toLowerCase();
-      if (
-        tagName === 'button' || 
-        tagName === 'a' || 
-        tagName === 'input' || 
-        tagName === 'label' ||
-        tagName === 'nav' ||
-        tagName === 'footer' ||
-        current.getAttribute('role') === 'button' ||
-        current.getAttribute('role') === 'radio' ||
-        current.getAttribute('role') === 'checkbox' ||
-        current.getAttribute('role') === 'option' ||
-        current.getAttribute('role') === 'tab' ||
-        current.getAttribute('role') === 'tablist' ||
-        current.getAttribute('role') === 'navigation'
-      ) {
-        return false;
-      }
-      
-      const className = (current.className || '').toString().toLowerCase();
-      if (
-        className.includes('option') ||
-        className.includes('choice') ||
-        className.includes('btn') ||
-        className.includes('button') ||
-        className.includes('drag') ||
-        className.includes('drop') ||
-        className.includes('answer') ||
-        className.includes('breadcrumb')
-      ) {
-        return false;
-      }
-      current = current.parentElement;
+    // 3. Must not be an interactive element or option
+    if (el.closest('button, a, input, label, nav, footer, [role="button"], [role="radio"], [role="checkbox"], [role="option"], [role="tab"], [role="tablist"], [role="navigation"]')) {
+      return false;
     }
+
+    // Check pointer cursor only on the element and its direct parent, not the whole tree
+    const style = window.getComputedStyle(el);
+    const parentStyle = el.parentElement ? window.getComputedStyle(el.parentElement) : null;
+    if (style.cursor === 'pointer' || (parentStyle && parentStyle.cursor === 'pointer')) {
+      return false;
+    }
+
+    // Check blacklisted classes on the element itself and up to 2 levels of parents to avoid matching root wrappers like "multiple-choice-wrapper"
+    let classCheckNode = el;
+    let levels = 0;
+    let isChoice = false;
+    while (classCheckNode && classCheckNode !== document.body && levels < 3) {
+      const cls = (classCheckNode.className || '').toString().toLowerCase();
+      if (
+        cls === 'option' || cls === 'choice' || cls === 'answer' || cls === 'btn' || cls === 'button' ||
+        cls.includes('breadcrumb') || cls.includes('drag') || cls.includes('drop') ||
+        cls.includes('radio') || cls.includes('checkbox') || cls.includes('nav-') || cls.includes('-nav')
+      ) {
+        isChoice = true;
+        break;
+      }
+      classCheckNode = classCheckNode.parentElement;
+      levels++;
+    }
+    if (isChoice) return false;
 
     // 4. Must look like a sentence or instruction (at least 2 words and contains letters)
     const words = text.split(/\s+/);
