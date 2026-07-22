@@ -1,20 +1,210 @@
 window.StealthUI = {
   isClosed: false,
   isMinimized: false,
+  hostElement: null,
+  shadowRoot: null,
   
   createOverlay: function() {
     if (this.isClosed) return;
     
-    let container = document.getElementById('stealth-ex-container');
-    if (!container) {
-      container = document.createElement('div');
+    if (!this.hostElement) {
+      // 1. Create Shadow Host element
+      const host = document.createElement('div');
+      host.id = 'stealth-ex-host';
+      this.hostElement = host;
+      
+      // 2. Attach a CLOSED Shadow DOM root
+      // In closed mode, host.shadowRoot evaluates to NULL on any webpage script inspecting DOM nodes!
+      const shadow = host.attachShadow({ mode: 'closed' });
+      this.shadowRoot = shadow;
+      
+      // 3. Inject CSS styles into the shadow root
+      const style = document.createElement('style');
+      style.textContent = `
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        #stealth-ex-container {
+          position: fixed;
+          top: 24px;
+          right: 24px;
+          width: 360px;
+          max-height: 82vh;
+          display: flex;
+          flex-direction: column;
+          background: radial-gradient(135% 135% at 0% 0%, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%);
+          backdrop-filter: blur(24px) saturate(200%);
+          -webkit-backdrop-filter: blur(24px) saturate(200%);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          box-shadow: 
+            0 24px 48px -12px rgba(0, 0, 0, 0.75), 
+            0 0 0 1px rgba(255, 255, 255, 0.05),
+            inset 0 1px 1px 0 rgba(255, 255, 255, 0.2);
+          border-radius: 20px;
+          padding: 16px 18px;
+          z-index: 2147483647;
+          font-family: 'Inter', system-ui, -apple-system, sans-serif;
+          color: #f8fafc;
+          pointer-events: auto;
+          user-select: none;
+          box-sizing: border-box;
+          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .stealth-ex-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 12px;
+          padding-bottom: 10px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .stealth-ex-title-badge {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 13px;
+          font-weight: 700;
+          letter-spacing: 0.03em;
+          color: #38bdf8;
+          text-transform: uppercase;
+        }
+
+        .stealth-ex-title-dot {
+          width: 7px;
+          height: 7px;
+          background-color: #10b981;
+          border-radius: 50%;
+          box-shadow: 0 0 8px #10b981;
+        }
+
+        .stealth-ex-controls {
+          display: flex;
+          gap: 6px;
+        }
+
+        .stealth-ex-controls button {
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          color: #94a3b8;
+          cursor: pointer;
+          width: 26px;
+          height: 26px;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 13px;
+          transition: all 0.2s ease;
+        }
+
+        .stealth-ex-controls button:hover {
+          background: rgba(255, 255, 255, 0.15);
+          color: #f8fafc;
+          border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        #stealth-ex-content {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          overflow-y: auto;
+          padding-right: 4px;
+        }
+
+        #stealth-ex-content::-webkit-scrollbar {
+          width: 5px;
+        }
+        #stealth-ex-content::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        #stealth-ex-content::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.15);
+          border-radius: 10px;
+        }
+        #stealth-ex-content::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.3);
+        }
+
+        .stealth-ex-qa-block {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          background: rgba(15, 23, 42, 0.65);
+          backdrop-filter: blur(12px);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          padding: 14px;
+          border-radius: 14px;
+          transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .stealth-ex-qa-block:first-child {
+          border-color: rgba(56, 189, 248, 0.4);
+          box-shadow: 0 4px 20px -4px rgba(56, 189, 248, 0.2);
+        }
+
+        .stealth-ex-question {
+          font-weight: 600;
+          font-size: 13px;
+          line-height: 1.45;
+          color: #f1f5f9;
+        }
+
+        .stealth-ex-answer {
+          font-weight: 600;
+          font-size: 13px;
+          line-height: 1.5;
+          color: #34d399;
+          display: flex;
+          align-items: flex-start;
+          gap: 8px;
+          white-space: pre-wrap;
+          background: rgba(16, 185, 129, 0.1);
+          border: 1px solid rgba(16, 185, 129, 0.25);
+          padding: 10px 12px;
+          border-radius: 10px;
+        }
+
+        .stealth-ex-answer::before {
+          content: '✔';
+          font-size: 13px;
+          color: #34d399;
+        }
+
+        .stealth-ex-loading {
+          font-size: 12px;
+          color: #94a3b8;
+          font-style: italic;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+      `;
+      shadow.appendChild(style);
+
+      // 4. Build overlay container inside the closed shadow root
+      const container = document.createElement('div');
       container.id = 'stealth-ex-container';
       
+      // Stop event propagation so user interactions inside overlay don't trigger host page event tracking!
+      ['click', 'mousedown', 'mouseup', 'keydown', 'keyup', 'keypress', 'pointerdown', 'pointerup', 'touchstart', 'touchend'].forEach(evt => {
+        container.addEventListener(evt, (e) => e.stopPropagation());
+      });
+
       const header = document.createElement('div');
       header.className = 'stealth-ex-header';
       
+      const titleBadge = document.createElement('div');
+      titleBadge.className = 'stealth-ex-title-badge';
+      
+      const dot = document.createElement('div');
+      dot.className = 'stealth-ex-title-dot';
+      
       const title = document.createElement('span');
       title.textContent = 'Stealth-Ex';
+      
+      titleBadge.appendChild(dot);
+      titleBadge.appendChild(title);
       
       const controls = document.createElement('div');
       controls.className = 'stealth-ex-controls';
@@ -41,7 +231,7 @@ window.StealthUI = {
       controls.appendChild(scanBtn);
       controls.appendChild(minBtn);
       controls.appendChild(closeBtn);
-      header.appendChild(title);
+      header.appendChild(titleBadge);
       header.appendChild(controls);
       
       const content = document.createElement('div');
@@ -49,43 +239,48 @@ window.StealthUI = {
       
       container.appendChild(header);
       container.appendChild(content);
-      document.body.appendChild(container);
+      shadow.appendChild(container);
+      
+      document.body.appendChild(host);
     }
   },
   
   toggleMinimize: function() {
     this.isMinimized = !this.isMinimized;
-    const content = document.getElementById('stealth-ex-content');
-    if (content) {
-      content.style.display = this.isMinimized ? 'none' : 'flex';
+    if (this.shadowRoot) {
+      const content = this.shadowRoot.getElementById('stealth-ex-content');
+      if (content) {
+        content.style.display = this.isMinimized ? 'none' : 'flex';
+      }
     }
   },
   
   close: function() {
     this.isClosed = true;
-    const container = document.getElementById('stealth-ex-container');
-    if (container) {
-      container.remove();
+    if (this.hostElement) {
+      this.hostElement.remove();
+      this.hostElement = null;
+      this.shadowRoot = null;
     }
   },
   
   clearBlocks: function() {
-    if (this.isClosed) return;
-    const content = document.getElementById('stealth-ex-content');
+    if (this.isClosed || !this.shadowRoot) return;
+    const content = this.shadowRoot.getElementById('stealth-ex-content');
     if (content) {
       content.innerHTML = '';
     }
   },
 
   addQABlock: function(questionId, questionText, answerText) {
-    if (this.isClosed) return;
-    const content = document.getElementById('stealth-ex-content');
+    if (this.isClosed || !this.shadowRoot) return;
+    const content = this.shadowRoot.getElementById('stealth-ex-content');
     if (!content) return;
 
     // If block already exists, bring it to the top (active question) and update it
-    let block = document.getElementById(`qa-${questionId}`);
+    let block = this.shadowRoot.getElementById(`qa-${questionId}`);
     if (block) {
-      const aDiv = document.getElementById(`ans-${questionId}`);
+      const aDiv = this.shadowRoot.getElementById(`ans-${questionId}`);
       if (aDiv && answerText) {
         aDiv.className = 'stealth-ex-answer';
         aDiv.textContent = answerText;
@@ -126,8 +321,8 @@ window.StealthUI = {
   },
 
   updateAnswer: function(questionId, answerText) {
-    if (this.isClosed) return;
-    const aDiv = document.getElementById(`ans-${questionId}`);
+    if (this.isClosed || !this.shadowRoot) return;
+    const aDiv = this.shadowRoot.getElementById(`ans-${questionId}`);
     if (aDiv) {
       aDiv.className = 'stealth-ex-answer';
       aDiv.textContent = answerText;
