@@ -43,21 +43,25 @@ function isElementVisible(el) {
 
 function findQuestionElements() {
   const candidates = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, div, li')).filter(el => {
-    const text = (el.innerText || '').trim();
-    if (text.length < 12 || text.length > 500) return false;
+    // 1. Ignore any elements inside our own Stealth-Ex UI overlay
+    if (el.closest('#stealth-ex-container')) return false;
 
-    // Filter out common header/footer/navigation text
+    const text = (el.innerText || '').trim();
+    if (text.length < 10 || text.length > 500) return false;
+
+    // 2. Filter out common header/footer/navigation text
     const textLower = text.toLowerCase();
-    const exactBlacklist = ['next', 'previous', 'submit', 'quit', 'exit', 'menu', 'nav', 'navigation', 'back', 'skip', 'continue', 'quit quiz', 'submit quiz'];
+    const exactBlacklist = ['next', 'previous', 'submit', 'quit', 'exit', 'menu', 'nav', 'navigation', 'back', 'skip', 'continue', 'quit quiz', 'submit quiz', 'skip question'];
     if (exactBlacklist.includes(textLower)) return false;
     
     if (/^(question\s+no|time|score|points|timer)/i.test(text) && text.length < 30) return false;
     if (/(quiz|test|exam)/i.test(text) && text.length < 30) return false;
 
-    // Must not be an interactive option or button
+    // 3. Must not be an interactive option, button, label, or choice
     let current = el;
-    let depth = 0;
     while (current && current !== document.body) {
+      if (current.id === 'stealth-ex-container') return false;
+
       const style = window.getComputedStyle(current);
       if (style.cursor === 'pointer' || style.cursor === 'grab' || style.cursor === 'grabbing') {
         return false;
@@ -67,30 +71,33 @@ function findQuestionElements() {
         tagName === 'button' || 
         tagName === 'a' || 
         tagName === 'input' || 
-        current.getAttribute('role') === 'button'
+        tagName === 'label' ||
+        current.getAttribute('role') === 'button' ||
+        current.getAttribute('role') === 'radio' ||
+        current.getAttribute('role') === 'checkbox' ||
+        current.getAttribute('role') === 'option'
       ) {
         return false;
       }
-      // Only filter out class names on the option itself or its immediate parent
-      if (depth < 2) {
-        const className = (current.className || '').toString().toLowerCase();
-        if (
-          className.includes('option') ||
-          className.includes('choice') ||
-          className.includes('btn') ||
-          className.includes('drag') ||
-          className.includes('drop')
-        ) {
-          return false;
-        }
+      
+      const className = (current.className || '').toString().toLowerCase();
+      if (
+        className.includes('option') ||
+        className.includes('choice') ||
+        className.includes('btn') ||
+        className.includes('button') ||
+        className.includes('drag') ||
+        className.includes('drop') ||
+        className.includes('answer')
+      ) {
+        return false;
       }
       current = current.parentElement;
-      depth++;
     }
 
-    // Must look like a sentence or instruction (at least 3 words and contains letters)
+    // 4. Must look like a sentence or instruction (at least 2 words and contains letters)
     const words = text.split(/\s+/);
-    if (words.length < 3) return false;
+    if (words.length < 2) return false;
     if (!/[a-zA-Z]/.test(text)) return false;
 
     return true;
@@ -121,9 +128,10 @@ function scanForQuestions() {
     }
   });
 
-  // Process all currently visible questions.
-  // Since StealthUI.addQABlock prepends to the container, the newest questions in DOM order will naturally sit at the top of the history.
-  visibleQuestions.forEach(text => {
+  // Pick ONLY the single active main question on the current screen (the last valid candidate in DOM order)
+  if (visibleQuestions.length > 0) {
+    const text = visibleQuestions[visibleQuestions.length - 1];
+
     if (!questionCache.has(text)) {
       const questionId = Date.now().toString() + Math.floor(Math.random() * 1000);
       questionCache.set(text, { id: questionId, answer: null });
@@ -171,10 +179,10 @@ function scanForQuestions() {
       }
     }
     
-    // Add the block or bring the existing block to the top of the history list
+    // Add the block or bring the active question block to the top of the history list
     const cacheData = questionCache.get(text);
     window.StealthUI.addQABlock(cacheData.id, text, cacheData.answer);
-  });
+  }
 }
 
 // Initial scan
