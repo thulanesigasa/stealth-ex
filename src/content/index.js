@@ -54,8 +54,8 @@ function findQuestionElements() {
     const exactBlacklist = ['next', 'previous', 'submit', 'quit', 'exit', 'menu', 'nav', 'navigation', 'back', 'skip', 'continue', 'quit quiz', 'submit quiz', 'skip question'];
     if (exactBlacklist.includes(textLower)) return false;
     
-    // Ignore breadcrumbs, navigation headings, and progress text
-    if (/^(go to|module|chapter|unit|section|lesson|page|index|summary|table of contents)/i.test(text)) return false;
+    // Ignore breadcrumbs, navigation headings, prerequisites, and progress text
+    if (/^(go to|module|chapter|unit|section|lesson|page|index|summary|table of contents|pre-requisite|prerequisite|course|instructions)/i.test(text)) return false;
     if (/^(question\s+\d+|time|score|points|timer)/i.test(text) && text.length < 35) return false;
     if (/(quiz|test|exam|checkpoint)/i.test(text) && text.length < 35) return false;
 
@@ -74,6 +74,8 @@ function findQuestionElements() {
         tagName === 'a' || 
         tagName === 'input' || 
         tagName === 'label' ||
+        tagName === 'nav' ||
+        tagName === 'footer' ||
         current.getAttribute('role') === 'button' ||
         current.getAttribute('role') === 'radio' ||
         current.getAttribute('role') === 'checkbox' ||
@@ -91,14 +93,17 @@ function findQuestionElements() {
         className.includes('drag') ||
         className.includes('drop') ||
         className.includes('answer') ||
-        className.includes('nav') ||
-        className.includes('menu') ||
-        className.includes('header') ||
-        className.includes('footer')
+        className.includes('breadcrumb')
       ) {
         return false;
       }
       current = current.parentElement;
+    }
+
+    // Check specific navigation classes only on the element itself
+    const elClass = (el.className || '').toString().toLowerCase();
+    if (elClass.includes('nav') || elClass.includes('menu') || elClass.includes('footer') || elClass.includes('breadcrumb')) {
+      return false;
     }
 
     // 4. Must look like a sentence or instruction (at least 2 words and contains letters)
