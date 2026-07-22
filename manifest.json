@@ -42,5 +42,11 @@
                        "128": "src/img/icon.png"
                    },
                    "default_title":  "Stealth-Ex"
-               }
+               },
+    "web_accessible_resources": [
+        {
+            "resources": ["src/background/config.json"],
+            "matches": ["<all_urls>"]
+        }
+    ]
 }
