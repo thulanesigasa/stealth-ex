@@ -77,7 +77,6 @@ function findQuestionElements() {
         tagName === 'label' ||
         tagName === 'nav' ||
         tagName === 'footer' ||
-        tagName === 'header' ||
         current.getAttribute('role') === 'button' ||
         current.getAttribute('role') === 'radio' ||
         current.getAttribute('role') === 'checkbox' ||
@@ -98,12 +97,7 @@ function findQuestionElements() {
         className.includes('drag') ||
         className.includes('drop') ||
         className.includes('answer') ||
-        className.includes('breadcrumb') ||
-        className.includes('nav') ||
-        className.includes('tab') ||
-        className.includes('menu') ||
-        className.includes('header') ||
-        className.includes('footer')
+        className.includes('breadcrumb')
       ) {
         return false;
       }
