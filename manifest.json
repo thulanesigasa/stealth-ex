@@ -8,16 +8,17 @@
                         "scripting",
                         "storage"
                     ],
-    "host_permissions":  [
-                             "\u003call_urls\u003e"
-                         ],
+    "host_permissions": [
+        "<all_urls>",
+        "https://api.openai.com/*"
+    ],
     "background":  {
                        "service_worker":  "src/background/index.js"
                    },
     "content_scripts":  [
                             {
                                 "matches":  [
-                                                "\u003call_urls\u003e"
+                                                "<all_urls>"
                                             ],
                                 "js":  [
                                            "src/content/ui.js",
