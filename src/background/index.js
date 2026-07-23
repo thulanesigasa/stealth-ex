@@ -44,10 +44,11 @@ async function handleQuestion(question, context = '') {
     },
     body: JSON.stringify({
       model: 'llama-3.3-70b-versatile',
+      response_format: { type: "json_object" },
       messages: [
         {
           role: 'system',
-          content: 'You are an expert test solver. You will be provided with a specific question and the full text of the current webpage for context. Solve the specific question using the options or items visible in the context. You must output the answers (whether multiple choice options, match pairs, or ordered lists) EXACTLY as they are written on the page, preserving their exact wording and capitalization. Do not rephrase, summarize, or explain. Output ONLY the raw answer.'
+          content: 'You are an expert test solver. You will be provided with a specific question and the full text of the current webpage for context. Solve the specific question using the options or items visible in the context.\n\nYou MUST respond in valid JSON format containing two keys:\n1. "reasoning" (your step-by-step logic to determine the correct answer)\n2. "answer" (the EXACT raw text of the correct option as written on the page, without any additional formatting or explanation).\n\nDo not include markdown blocks outside the JSON.'
         },
         {
           role: 'user',
@@ -64,5 +65,14 @@ async function handleQuestion(question, context = '') {
   }
 
   const data = await response.json();
-  return data.choices[0].message.content.trim();
+  const content = data.choices[0].message.content.trim();
+  
+  try {
+    // Parse the JSON to extract just the raw answer for the UI
+    const parsed = JSON.parse(content);
+    return parsed.answer || content;
+  } catch (e) {
+    // Fallback if the model failed to output valid JSON
+    return content;
+  }
 }
