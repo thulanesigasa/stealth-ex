@@ -4,7 +4,7 @@ async function loadApiKey() {
   try {
     const response = await fetch(chrome.runtime.getURL('src/background/config.json'));
     const config = await response.json();
-    API_KEY = config.OPENAI_API_KEY;
+    API_KEY = config.GROQ_API_KEY;
   } catch (err) {
     console.error('Failed to load API key from config.json:', err);
   }
@@ -30,20 +30,20 @@ async function handleQuestion(question, context = '') {
     await loadApiKey();
   }
   if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE') {
-    return 'Please set your OpenAI API key in src/background/config.json';
+    return 'Please set your Groq API key in src/background/config.json';
   }
 
   // Cap context length to avoid token limits for very large pages
   const safeContext = context.length > 8000 ? context.substring(0, 8000) + '...' : context;
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${API_KEY}`
     },
     body: JSON.stringify({
-      model: 'gpt-4o',
+      model: 'llama-3.3-70b-versatile',
       messages: [
         {
           role: 'system',
