@@ -10,7 +10,7 @@
                     ],
     "host_permissions": [
         "<all_urls>",
-        "https://api.openai.com/*"
+        "https://api.groq.com/*"
     ],
     "background":  {
                        "service_worker":  "src/background/index.js"
