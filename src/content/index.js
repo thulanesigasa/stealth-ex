@@ -150,9 +150,10 @@ function scanForQuestions() {
       bestMatch = visibleCandidates.find(c => c.text.includes('?'));
     }
 
-    // Fallback to the candidate highest up in DOM (or main content area)
+    // If no valid question text was found, do not fallback to random page text.
+    // Let the top frame stay silent so the embedded iframe's overlay can take precedence.
     if (!bestMatch) {
-      bestMatch = visibleCandidates[0];
+      return;
     }
 
     const text = bestMatch.text;
