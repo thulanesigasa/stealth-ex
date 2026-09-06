@@ -60,12 +60,17 @@ function findQuestionElements() {
     if (/^(question\s+\d+|time|score|points|timer)/i.test(text) && text.length < 35) return false;
     if (/(quiz|test|exam|checkpoint)/i.test(text) && text.length < 35) return false;
 
-    // FAST TRACK: If the text strongly resembles a question, skip aggressive DOM hierarchy filtering
+    // ALWAYS reject standard navigation elements and buttons, even if they contain a question mark
+    if (el.closest('button, a, nav, footer, [role="button"], [role="tab"], [role="tablist"], [role="navigation"]')) {
+      return false;
+    }
+
+    // FAST TRACK: If the text strongly resembles a question, skip aggressive option/class filtering
     const isObviouslyQuestion = text.endsWith('?') || /^(which|what|why|how|when|where|who|select|choose|identify|match)\b/i.test(text);
 
     if (!isObviouslyQuestion) {
-      // 3. Must not be an interactive element or option
-      if (el.closest('button, a, input, label, nav, footer, [role="button"], [role="radio"], [role="checkbox"], [role="option"], [role="tab"], [role="tablist"], [role="navigation"]')) {
+      // 3. Must not be an interactive input or option
+      if (el.closest('input, label, [role="radio"], [role="checkbox"], [role="option"]')) {
         return false;
       }
 
